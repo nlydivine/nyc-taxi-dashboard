@@ -1,14 +1,17 @@
 import pandas as panda
 import pprint
 
-data = panda.read_csv("data/yellow_tripdata_2019-01.csv", header=0, chunksize=50)
-zone_lookup = panda.read_csv("data/taxi_zone_lookup.csv", header= 0)
+data = panda.read_csv("./yellow_tripdata_2019-01.csv", header=0, chunksize=50)
+zone_lookup = panda.read_csv("./taxi_zone_lookup.csv", header= 0)
 
 for chunk in data:
     break #rail to keep only 50 records for test
 
 chunk['tpep_pickup_datetime'] = panda.to_datetime(chunk['tpep_pickup_datetime'])
 chunk['tpep_dropoff_datetime'] = panda.to_datetime(chunk['tpep_dropoff_datetime'])
+
+currency_fields = ['fare_amount', 'extra', 'mta_tax', 'tip_amount', 'tolls_amount', 'improvement_surcharge', 'total_amount']
+chunk[currency_fields] = chunk[currency_fields].round(2)
 
 data_chunk = chunk.to_dict('records')
 
@@ -23,14 +26,14 @@ for record in data_chunk:
         failed_checks.append((record, 'null field'))
     elif record['fare_amount'] < 0 or record['total_amount'] < 0:
      failed_checks.append((record, 'negative amount'))
+    elif record['tpep_pickup_datetime'].year < 2019:
+        failed_checks.append((record, 'year of record out of given range'))
+    elif record['tpep_dropoff_datetime'] < record['tpep_pickup_datetime']:
+        failed_checks.append((record, 'dropoff time earlier than pickup time'))
     elif record['passenger_count'] <= 0 or record['passenger_count'] > 8: #8 is a test case figure
         failed_checks.append((record, 'negative or excessive passenger count'))
     elif record['trip_distance'] <= 0:
         failed_checks.append((record, 'zero or negative trip distance'))
-    elif record['tpep_dropoff_datetime'] < record['tpep_pickup_datetime']:
-        failed_checks.append((record, 'dropoff time earlier than pickup time'))
-    elif record['tpep_pickup_datetime'].year < 2019:
-        failed_checks.append((record, 'year of record out of given range'))
     elif record['DOLocationID'] not in valid_ids or record['PULocationID'] not in valid_ids:
         failed_checks.append((record, 'location does not appear in lookup dict'))
     elif record['store_and_fwd_flag'] not in ("Y", "N"):
@@ -43,7 +46,8 @@ for record in data_chunk:
         failed_checks.append((record, 'vendorID not recognised'))
     else:
         valid_checks.append(record)
-        panda.DataFrame(valid_checks).to_csv('test/valid_records.csv', index=False)
+  
+panda.DataFrame(valid_checks).to_csv('../test/valid_records.csv', index=False)
 
-pprint.pprint(failed_checks)
-    
+failed_rows = [{**record, 'reason': reason} for record, reason in failed_checks]
+panda.DataFrame(failed_rows).to_csv('../test/failed_records.csv', index=False)
