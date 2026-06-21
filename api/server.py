@@ -1,14 +1,20 @@
 import os
 import sys
 import sqlite3
+<<<<<<< HEAD
 from flask import Flask, request, jsonify
+=======
+from flask import Flask, request, jsonify, send_from_directory
+>>>>>>> Merge frontend+API into one Flask service
 from flask_cors import CORS
 
 #find the db when run from anywhere
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.connection import get_connection
 
-app = Flask(__name__)
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 CORS(app)
 
 def get_db():
@@ -18,15 +24,68 @@ def get_db():
 
 @app.route("/", methods=["GET"])
 def index():
+<<<<<<< HEAD
+=======
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+@app.route("/api/health", methods=["GET"])
+def health():
+>>>>>>> Merge frontend+API into one Flask service
     return jsonify({"message": "API is running"})
 
 @app.route("/trips", methods=["GET"])
 def get_trips():
+<<<<<<< HEAD
     limit = request.args.get("limit", default=100, type=int)
     skip = request.args.get("skip", default=0, type=int)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM trips LIMIT ? OFFSET ?", [limit, skip])
+=======
+    limit = request.args.get("limit", default=5000, type=int)
+    skip = request.args.get("skip", default=0, type=int)
+    borough = request.args.get("borough")
+    min_distance = request.args.get("minDistance", type=float)
+    max_distance = request.args.get("maxDistance", type=float)
+
+    query = """
+        SELECT
+            t.trip_id AS id,
+            REPLACE(t.tpep_pickup_datetime, ' ', 'T') AS pickup_datetime,
+            puz.Borough AS pickup_borough,
+            doz.Borough AS dropoff_borough,
+            puz.Zone AS pickup_zone,
+            doz.Zone AS dropoff_zone,
+            t.trip_distance AS trip_distance,
+            t.trip_duration_minutes AS trip_duration_min,
+            t.fare_amount AS fare_amount,
+            t.tip_amount AS tip_amount,
+            t.total_amount AS total_amount,
+            ROUND(t.total_amount / NULLIF(t.trip_distance, 0), 2) AS cost_per_mile,
+            t.avg_speed_mph AS avg_speed_mph
+        FROM trips t
+        JOIN zones puz ON t.PULocationID = puz.LocationID
+        JOIN zones doz ON t.DOLocationID = doz.LocationID
+        WHERE 1=1
+    """
+    params = []
+    if borough and borough != "all":
+        query += " AND puz.Borough = ?"
+        params.append(borough)
+    if min_distance is not None:
+        query += " AND t.trip_distance >= ?"
+        params.append(min_distance)
+    if max_distance is not None:
+        query += " AND t.trip_distance <= ?"
+        params.append(max_distance)
+
+    query += " ORDER BY t.trip_id LIMIT ? OFFSET ?"
+    params.extend([limit, skip])
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+>>>>>>> Merge frontend+API into one Flask service
     rows = cursor.fetchall()
     conn.close()
     return jsonify([dict(row) for row in rows])
@@ -128,4 +187,8 @@ def search_trips():
     return jsonify([dict(row) for row in rows])
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(host="0.0.0.0", port=5000, debug=True)
+=======
+ app.run(host="0.0.0.0", port=5000, debug=False)
+>>>>>>> Merge frontend+API into one Flask service
