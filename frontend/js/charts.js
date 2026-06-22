@@ -58,7 +58,7 @@ function renderHourlyChart(trips) {
 }
 
 function renderFareByBoroughChart(trips) {
-  const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
+  const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island", "Unknown"];
   const totals = {};
   const counts = {};
   boroughs.forEach(b => { totals[b] = 0; counts[b] = 0; });

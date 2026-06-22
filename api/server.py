@@ -1,14 +1,9 @@
 import os
 import sys
 import sqlite3
-<<<<<<< HEAD
-from flask import Flask, request, jsonify
-=======
 from flask import Flask, request, jsonify, send_from_directory
->>>>>>> Merge frontend+API into one Flask service
 from flask_cors import CORS
 
-#find the db when run from anywhere
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database.connection import get_connection
 
@@ -24,24 +19,14 @@ def get_db():
 
 @app.route("/", methods=["GET"])
 def index():
-<<<<<<< HEAD
-=======
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 @app.route("/api/health", methods=["GET"])
 def health():
->>>>>>> Merge frontend+API into one Flask service
     return jsonify({"message": "API is running"})
 
 @app.route("/trips", methods=["GET"])
 def get_trips():
-<<<<<<< HEAD
-    limit = request.args.get("limit", default=100, type=int)
-    skip = request.args.get("skip", default=0, type=int)
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM trips LIMIT ? OFFSET ?", [limit, skip])
-=======
     limit = request.args.get("limit", default=5000, type=int)
     skip = request.args.get("skip", default=0, type=int)
     borough = request.args.get("borough")
@@ -85,7 +70,6 @@ def get_trips():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(query, params)
->>>>>>> Merge frontend+API into one Flask service
     rows = cursor.fetchall()
     conn.close()
     return jsonify([dict(row) for row in rows])
@@ -129,7 +113,6 @@ def get_columns():
     columns = [row["name"] for row in rows]
     return jsonify({"columns": columns})
 
-#DSA
 time_index = []
 
 def build_index():
@@ -140,7 +123,7 @@ def build_index():
     time_index = [(row["tpep_pickup_datetime"], row["trip_id"]) for row in cursor.fetchall()]
     conn.close()
 
-def window_start(target):  #left pointer
+def window_start(target):
     lo = 0
     hi = len(time_index)
     while lo < hi:
@@ -151,7 +134,7 @@ def window_start(target):  #left pointer
             hi = mid
     return lo
 
-def window_end(target):  #right pointer
+def window_end(target):
     lo = 0
     hi = len(time_index)
     while lo < hi:
@@ -168,16 +151,13 @@ def search_trips():
     time_to = request.args.get("to")
     if not time_from or not time_to:
         return jsonify({"error": "from and to datetime required"}), 400
-
     if not time_index:
         build_index()
-
     start = window_start(time_from)
     end = window_end(time_to)
     ids = [trip_id for (pickup_time, trip_id) in time_index[start:end]]
     if not ids:
         return jsonify([])
-
     conn = get_db()
     cursor = conn.cursor()
     placeholders = ",".join("?" for _ in ids)
@@ -187,8 +167,5 @@ def search_trips():
     return jsonify([dict(row) for row in rows])
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     app.run(host="0.0.0.0", port=5000, debug=True)
-=======
- app.run(host="0.0.0.0", port=5000, debug=False)
->>>>>>> Merge frontend+API into one Flask service
+
