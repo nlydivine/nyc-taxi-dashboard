@@ -68,4 +68,8 @@ python api/server.py
 
 https://docs.google.com/spreadsheets/d/1qxBGiE-POxkCGxn0fO9SizrMUbAoaF0W0e4it4_ZWxU/edit?usp=sharing
 
+## Video Walkthrough Link
+
+https://youtu.be/nozrYj1_e6E?si=xl2X5MEEM3hpiq2G
+
 
