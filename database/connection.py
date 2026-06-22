@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "nyc_taxi.db"
+DB_NAME = "./database/nyc_taxi.db"
 
 def get_connection():
     conn = sqlite3.connect(DB_NAME)
