@@ -58,13 +58,16 @@ function renderHourlyChart(trips) {
 }
 
 function renderFareByBoroughChart(trips) {
-  const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island", "Unknown"];
+  const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"];
   const totals = {};
   const counts = {};
   boroughs.forEach(b => { totals[b] = 0; counts[b] = 0; });
   trips.forEach(t => {
-    totals[t.pickup_borough] += t.fare_amount;
-    counts[t.pickup_borough]++;
+    const b = t.pickup_borough;
+    if (totals[b] !== undefined) {
+      totals[b] += t.fare_amount;
+      counts[b]++;
+    }
   });
   const data = boroughs.map(b => counts[b] ? +(totals[b] / counts[b]).toFixed(2) : 0);
   const ctx = document.getElementById("chartFareByBorough");
@@ -79,7 +82,25 @@ function renderFareByBoroughChart(trips) {
       labels: ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Isl."],
       datasets: [{ data, backgroundColor: COLORS.palette, borderRadius: 3 }]
     },
-    options: { ...baseOptions, indexAxis: "y" }
+    options: { 
+  ...baseOptions, 
+  indexAxis: "y",
+  scales: {
+    x: {
+      beginAtZero: true,
+      ticks: { 
+        color: "#6B6B6B", 
+        font: { family: "JetBrains Mono", size: 10 },
+        callback: function(value) { return "$" + value; }
+      },
+      grid: { color: "#E8E0C8" }
+    },
+    y: {
+      ticks: { color: "#6B6B6B", font: { family: "JetBrains Mono", size: 10 } },
+      grid: { color: "#E8E0C8" }
+    }
+  }
+}
   });
 }
 
