@@ -63,3 +63,9 @@ python api/server.py
 * Query trip information through a Flask API
 * Analyze pickup and dropoff patterns
 * Visualize trends and statistics
+
+## Team Participation Sheet Link
+
+https://docs.google.com/spreadsheets/d/1qxBGiE-POxkCGxn0fO9SizrMUbAoaF0W0e4it4_ZWxU/edit?usp=sharing
+
+
