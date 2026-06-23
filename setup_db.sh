@@ -2,7 +2,7 @@
 set -e
 
 DB_FILE="nyc_taxi.db"
-DUMP_FILE="deliverables/nyc_taxi_dump.sql"
+DUMP_FILE="database/schema.sql"
 
 if [ -f "$DB_FILE" ]; then
     echo "✅ $DB_FILE already exists — nothing to do."
